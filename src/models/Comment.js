@@ -1,15 +1,15 @@
 import { DataTypes, Model } from 'sequelize';
 
-class Post extends Model {
+class Comment extends Model {
     static init(sequelize) {
         super.init({
-            description: {
+            comment: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 validate: {
                     notEmpty: {
                         args: true,
-                        msg: 'You should add a description to your post'
+                        msg: 'You should add something to your comment'
                     }
                 }
             },
@@ -29,10 +29,9 @@ class Post extends Model {
     }
 
     static associate(models) {
+        this.belongsTo(models.Post, { foreignKey: 'postId' });
         this.belongsTo(models.User, { foreignKey: 'userId' });
-        this.hasMany(models.PostPhoto, { foreignKey: 'postId' });
-        this.hasMany(models.Comment, { foreignKey: 'postId' });
     }
 }
 
-export default Post;
+export default Comment;

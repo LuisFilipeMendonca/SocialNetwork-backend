@@ -4,8 +4,9 @@ import databaseConfig from '../config/database';
 import User from '../models/User';
 import Post from '../models/Post';
 import PostPhoto from '../models/PostPhoto';
+import Comment from '../models/Comment';
 
-const models = [User, Post, PostPhoto];
+const models = [User, Post, PostPhoto, Comment];
 
 const connection = new Sequelize(databaseConfig);
 

@@ -77,7 +77,8 @@ class User extends Model {
     }
 
     static associate(models) {
-        this.hasMany(models.Post, { foreignKey: 'userId' })
+        this.hasMany(models.Post, { foreignKey: 'userId' });
+        this.hasMany(models.Comment, { foreignKey: 'userId' });
     }
 };
 

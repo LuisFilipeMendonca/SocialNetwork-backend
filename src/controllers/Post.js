@@ -4,6 +4,7 @@ import multerConfig from '../config/multer';
 import Post from '../models/Post';
 import PostPhoto from '../models/PostPhoto';
 import User from '../models/User';
+import Comment from '../models/Comment';
 
 const upload = multer(multerConfig).array('postPhoto', 5);
 
@@ -23,7 +24,7 @@ class PostController {
 
                 const postData = {
                     description,
-                    userId: 11
+                    userId: 12
                 }
 
                 const post = (await Post.create(postData)).toJSON();
@@ -59,12 +60,14 @@ class PostController {
                 }, {
                     model: PostPhoto,
                     attributes: ['postPhotoUrl', 'postPhoto']
+                }, {
+                    model: Comment
                 }]
             });
 
             return res.status(200).json(posts);
 
-        } catch(e) {
+        } catch (e) {
             console.log(e);
         }
     }
@@ -82,12 +85,19 @@ class PostController {
                 }, {
                     model: PostPhoto,
                     attributes: ['postPhotoUrl', 'postPhoto']
+                }, {
+                    model: Comment,
+                    attributes: ['comment', 'createdAt'],
+                    include: [{
+                        model: User,
+                        attributes: ['profilePictureUrl', 'username', 'id', 'profilePicture']
+                    }]
                 }]
             });
 
             return res.status(200).json(post);
 
-        } catch(e) {
+        } catch (e) {
             console.log(e);
         }
     }
@@ -103,7 +113,7 @@ class PostController {
 
             return res.status(200).json({ msg: 'Your post was deleted.' });
 
-        } catch(e) {
+        } catch (e) {
             console.log(e);
         }
     }
