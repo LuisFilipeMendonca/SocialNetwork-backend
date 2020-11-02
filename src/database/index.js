@@ -1,7 +1,11 @@
 import Sequelize from 'sequelize';
 import databaseConfig from '../config/database';
 
-const models = [];
+import User from '../models/User';
+import Post from '../models/Post';
+import PostPhoto from '../models/PostPhoto';
+
+const models = [User, Post, PostPhoto];
 
 const connection = new Sequelize(databaseConfig);
 

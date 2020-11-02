@@ -4,5 +4,10 @@ module.exports = {
     username: 'root',
     password: 'rapenghtler123',
     port: 3306,
-    dialect: 'mysql'
+    dialect: 'mysql',
+    define: {
+        timestamps: true,
+        underscored: true,
+        underscoredAll: true,
+    }
 }
