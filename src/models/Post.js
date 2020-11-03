@@ -32,6 +32,7 @@ class Post extends Model {
         this.belongsTo(models.User, { foreignKey: 'userId' });
         this.hasMany(models.PostPhoto, { foreignKey: 'postId' });
         this.hasMany(models.Comment, { foreignKey: 'postId' });
+        this.hasMany(models.Like, { foreignKey: 'postId' });
     }
 }
 

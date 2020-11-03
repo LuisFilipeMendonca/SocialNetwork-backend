@@ -19,11 +19,14 @@ class UserController {
 
                 const { username, email, password } = req.body;
 
-                const userData = {
+                let userData = {
                     username,
                     email,
                     password,
-                    profilePicture: req.file.filename
+                }
+
+                if(req.file) {
+                    userData = {...userData, profilePicture: req.file.filename};
                 }
 
                 const user = await User.create(userData);

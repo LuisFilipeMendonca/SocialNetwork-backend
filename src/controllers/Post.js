@@ -1,10 +1,12 @@
 import multer from 'multer';
 import multerConfig from '../config/multer';
+import Sequelize from 'sequelize';
 
 import Post from '../models/Post';
 import PostPhoto from '../models/PostPhoto';
 import User from '../models/User';
 import Comment from '../models/Comment';
+import Like from '../models/Like';
 
 const upload = multer(multerConfig).array('postPhoto', 5);
 
@@ -24,7 +26,7 @@ class PostController {
 
                 const postData = {
                     description,
-                    userId: 12
+                    userId: 13
                 }
 
                 const post = (await Post.create(postData)).toJSON();
@@ -61,11 +63,20 @@ class PostController {
                     model: PostPhoto,
                     attributes: ['postPhotoUrl', 'postPhoto']
                 }, {
-                    model: Comment
+                    model: Comment,
+                    attributes: ['comment', 'createdAt'],
+                    include: [{
+                        model: User,
+                        attributes: ['profilePictureUrl', 'username', 'id', 'profilePicture']
+                    }]
+                }, {
+                    model: Like,
                 }]
             });
 
-            return res.status(200).json(posts);
+            const updatedPosts = Like.searchUserLike(13, posts);
+
+            return res.status(200).json(updatedPosts);
 
         } catch (e) {
             console.log(e);
@@ -92,10 +103,15 @@ class PostController {
                         model: User,
                         attributes: ['profilePictureUrl', 'username', 'id', 'profilePicture']
                     }]
+                }, {
+                    model: Like,
+                    attributes: ['userId']
                 }]
             });
 
-            return res.status(200).json(post);
+            const updatedPosts = Like.searchUserLike(13, posts);
+
+            return res.status(200).json(updatedPosts);
 
         } catch (e) {
             console.log(e);

@@ -6,8 +6,8 @@ class CommentController {
 
             const commentData = {
                 comment: 'Nice post!',
-                userId: 12,
-                postId: 21
+                userId: 13,
+                postId: 23
             }
 
             const comment = await Comment.create(commentData);
