@@ -1,72 +1,103 @@
-import multer from 'multer';
-import multerConfig from '../config/multer';
+import multer from "multer";
+import multerConfig from "../config/multer";
 
-import User from '../models/User';
+import User from "../models/User";
+import Post from "../models/Post";
+import PostPhoto from "../models/PostPhoto";
 
-const upload = multer(multerConfig).single('profilePicture');
+const upload = multer(multerConfig).single("profilePicture");
 
 class UserController {
-    async createUser(req, res) {
-        return upload(req, res, async (photoError) => {
-            if (photoError) {
-                return res.status(400).json({
-                    field: 'file',
-                    msg: photoError.code
-                })
-            }
+  async createUser(req, res) {
+    return upload(req, res, async (photoError) => {
+      if (photoError) {
+        return res.status(400).json({
+          field: "file",
+          msg: photoError.code,
+        });
+      }
 
-            try {
+      try {
+        const { username, email, password } = req.body;
 
-                const { username, email, password } = req.body;
+        let userData = {
+          username,
+          email,
+          password,
+        };
 
-                let userData = {
-                    username,
-                    email,
-                    password,
-                }
+        if (req.file) {
+          userData = { ...userData, profilePicture: req.file.filename };
+        }
 
-                if(req.file) {
-                    userData = {...userData, profilePicture: req.file.filename};
-                }
+        const user = await User.create(userData);
 
-                const user = await User.create(userData);
+        return res.status(200).json(user);
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  }
 
-                return res.status(200).json(user);
+  async updateUser(req, res) {
+    upload(req, res, async (photoError) => {
+      if (photoError) {
+        return res.status(400).json({
+          field: "file",
+          msg: photoError.code,
+        });
+      }
 
-            } catch (e) {
-                console.log(e);
-            }
-        })
+      try {
+        let userData = req.body;
+
+        if (req.file) {
+          userData = { ...userData, profilePicture: req.file.filename };
+        }
+
+        const user = await User.findByPk(req.params.id);
+
+        await user.update(userData);
+
+        return res.status(200).json(user);
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  }
+
+  async getUser(req, res) {
+    try {
+      const { userId } = req.params;
+
+      const user = await User.findByPk(userId, {
+        attributes: [
+          "profilePictureUrl",
+          "profilePicture",
+          "username",
+          "email",
+        ],
+        include: [
+          {
+            model: Post,
+            attributes: ["id"],
+            include: [
+              {
+                model: PostPhoto,
+                attributes: ["postPhotoUrl", "postPhoto"],
+                limit: 1,
+              },
+            ],
+          },
+        ],
+        order: [["Posts", "id", "DESC"]],
+      });
+
+      return res.status(200).json(user);
+    } catch (e) {
+      console.log(e);
     }
-
-    async updateUser(req, res) {
-        upload(req, res, async (photoError) => {
-            if(photoError) {
-                return res.status(400).json({
-                    field: 'file',
-                    msg: photoError.code
-                })
-            }
-
-            try {
-
-                let userData = req.body;
-
-                if(req.file) {
-                    userData = {...userData, profilePicture: req.file.filename};
-                }
-
-                const user = await User.findByPk(req.params.id);
-
-                await user.update(userData);
-
-                return res.status(200).json(user);
-
-            } catch(e) {
-                console.log(e)
-            }
-        })
-    }
+  }
 }
 
 export default new UserController();
