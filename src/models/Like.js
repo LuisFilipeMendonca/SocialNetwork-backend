@@ -21,13 +21,14 @@ class Like extends Model {
     return this;
   }
 
-  static searchUserLike(userId, posts) {
+  static searchLikeAndAddCommentData(userId, posts) {
     const postsString = JSON.stringify(posts);
     return JSON.parse(postsString).map((post) => {
       return {
         ...post,
         alreadyLiked: post.Likes.some((like) => like.userId === userId),
         liked: false,
+        CommentData: {},
       };
     });
   }

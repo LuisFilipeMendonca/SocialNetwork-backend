@@ -25,7 +25,7 @@ class PostController {
 
         const postData = {
           description,
-          userId: 26,
+          userId: 12,
         };
 
         const post = (await Post.create(postData)).toJSON();
@@ -68,29 +68,12 @@ class PostController {
             attributes: ["postPhotoUrl", "postPhoto", "id"],
           },
           {
-            model: Comment,
-            attributes: ["comment", "createdAt", "id"],
-            separate: true,
-            order: [["createdAt", "DESC"]],
-            include: [
-              {
-                model: User,
-                attributes: [
-                  "profilePictureUrl",
-                  "username",
-                  "id",
-                  "profilePicture",
-                ],
-              },
-            ],
-          },
-          {
             model: Like,
           },
         ],
       });
 
-      const updatedPosts = Like.searchUserLike(req.user.id, posts);
+      const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
 
       return res.status(200).json(updatedPosts);
     } catch (e) {

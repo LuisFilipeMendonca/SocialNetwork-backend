@@ -31,7 +31,9 @@ class TokenController {
         expiresIn: "7d",
       });
 
-      return res.status(200).json({ email, token, id: user.id });
+      return res
+        .status(200)
+        .json({ userEmail: email, userToken: token, userId: user.id });
     } catch (e) {
       console.log(e);
     }

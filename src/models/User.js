@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import bcrypt from "bcrypt";
-import appConfig from "../../../../backend/src/config/appConfig";
+import appConfig from "../config/appConfig";
 
 class User extends Model {
   static init(sequelize) {
