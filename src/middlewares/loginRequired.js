@@ -26,6 +26,10 @@ export default async (req, res, next) => {
       attributes: ["profilePictureUrl", "profilePicture", "username", "id"],
     });
 
+    if (!user) {
+      return res.status(401).json({ errorMsg: "Your account doesn't exists." });
+    }
+
     req.user = user;
 
     next();

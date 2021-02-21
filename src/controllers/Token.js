@@ -19,6 +19,8 @@ class TokenController {
           .json({ field: "password", msg: "Your password cannot be empty." });
       }
 
+      // ENDIREITAR
+
       const user = await User.findOne({ where: { email } });
 
       if (!(await user.isPasswordValid(password))) {
@@ -33,7 +35,12 @@ class TokenController {
 
       return res
         .status(200)
-        .json({ userEmail: email, userToken: token, userId: user.id });
+        .json({
+          userEmail: email,
+          userToken: token,
+          userId: user.id,
+          isFirstTime: user.firstTime,
+        });
     } catch (e) {
       console.log(e);
     }

@@ -55,6 +55,8 @@ class UserController {
           userData = { ...userData, profilePicture: req.file.filename };
         }
 
+        // PRECISO ENDIREITAR
+
         const user = await User.findByPk(req.params.id);
 
         await user.update(userData);

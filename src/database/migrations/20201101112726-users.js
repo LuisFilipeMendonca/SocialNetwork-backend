@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable("users", {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -20,35 +20,40 @@ module.exports = {
       passwordHash: {
         type: Sequelize.STRING,
         allowNull: false,
-        field: 'password_hash',
+        field: "password_hash",
       },
       profilePicture: {
         type: Sequelize.STRING,
         allowNull: true,
-        field: 'profile_picture'
+        field: "profile_picture",
+      },
+      firstTime: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        field: "first_time",
       },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: 'created_at'
+        field: "created_at",
       },
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        field: 'updated_at'
-      }
+        field: "updated_at",
+      },
     });
 
-    await queryInterface.addIndex('users', ["email"], {
+    await queryInterface.addIndex("users", ["email"], {
       unique: true,
     });
 
-    await queryInterface.addIndex('users', ["username"], {
+    await queryInterface.addIndex("users", ["username"], {
       unique: true,
     });
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('users');
-  }
+    await queryInterface.dropTable("users");
+  },
 };

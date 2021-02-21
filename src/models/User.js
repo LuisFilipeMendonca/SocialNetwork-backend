@@ -53,6 +53,12 @@ class User extends Model {
             )}`;
           },
         },
+        firstTime: {
+          type: DataTypes.BOOLEAN,
+          allowNull: true,
+          defaultValue: true,
+          field: "first_time",
+        },
         createdAt: {
           type: DataTypes.DATE,
           allowNull: false,
