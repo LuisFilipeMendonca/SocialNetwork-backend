@@ -1,5 +1,3 @@
-import jwt from "jsonwebtoken";
-
 import User from "../models/User";
 
 class TokenController {
@@ -21,7 +19,10 @@ class TokenController {
 
       // ENDIREITAR
 
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({
+        where: { email },
+        attributes: { exclude: ["createdAt", "updatedAt"] },
+      });
 
       if (!(await user.isPasswordValid(password))) {
         return res
@@ -29,18 +30,18 @@ class TokenController {
           .json({ field: "password", msg: "Your password is invalid." });
       }
 
-      const token = jwt.sign({ email }, process.env.TOKEN_SECRET, {
-        expiresIn: "7d",
-      });
+      const token = user.createUserToken(user.email);
 
-      return res
-        .status(200)
-        .json({
-          userEmail: email,
-          userToken: token,
-          userId: user.id,
-          isFirstTime: user.firstTime,
-        });
+      console.log(user);
+
+      return res.status(200).json({
+        userId: user.id,
+        userEmail: user.email,
+        userProfilePicture: user.profilePictureUrl,
+        userName: user.username,
+        userFirstTime: user.firstTime,
+        token,
+      });
     } catch (e) {
       console.log(e);
     }

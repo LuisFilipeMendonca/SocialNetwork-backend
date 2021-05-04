@@ -6,7 +6,7 @@ class CommentController {
     try {
       const data = {
         comment: req.body.comment,
-        userId: req.user.id,
+        userId: 5,
         postId: req.body.postId,
       };
 

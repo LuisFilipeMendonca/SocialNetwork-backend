@@ -32,7 +32,16 @@ class UserController {
 
         const user = await User.create(userData);
 
-        return res.status(200).json(user);
+        const token = user.createUserToken(user.email);
+
+        return res.status(200).json({
+          userId: user.id,
+          userEmail: user.email,
+          userProfilePicture: user.profilePictureUrl,
+          userName: user.username,
+          userFirstTime: user.firstTime,
+          token,
+        });
       } catch (e) {
         console.log(e);
       }

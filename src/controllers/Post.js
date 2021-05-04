@@ -1,6 +1,5 @@
 import multer from "multer";
 import multerConfig from "../config/multer";
-import Sequelize from "sequelize";
 
 import Post from "../models/Post";
 import PostPhoto from "../models/PostPhoto";
@@ -25,7 +24,7 @@ class PostController {
 
         const postData = {
           description,
-          userId: 12,
+          userId: 3,
         };
 
         const post = (await Post.create(postData)).toJSON();
@@ -52,30 +51,36 @@ class PostController {
     try {
       const posts = await Post.findAll({
         order: [["createdAt", "DESC"]],
-        attributes: ["id", "description", "createdAt"],
+        attributes: {
+          exclude: ["updatedAt", "userId"],
+        },
         include: [
           {
             model: User,
-            attributes: [
-              "profilePicture",
-              "profilePictureUrl",
-              "id",
-              "username",
-            ],
           },
           {
             model: PostPhoto,
-            attributes: ["postPhotoUrl", "postPhoto", "id"],
+            attributes: {
+              exclude: ["createdAt", "updatedAt", "postId"],
+            },
           },
           {
             model: Like,
           },
+          {
+            model: Comment,
+            include: [
+              {
+                model: User,
+              },
+            ],
+          },
         ],
       });
 
-      const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
+      // const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
 
-      return res.status(200).json(updatedPosts);
+      return res.status(200).json(posts);
     } catch (e) {
       console.log(e);
     }

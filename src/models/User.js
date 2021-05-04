@@ -1,13 +1,14 @@
 import { DataTypes, Model } from "sequelize";
 import bcrypt from "bcrypt";
 import appConfig from "../config/appConfig";
+import jwt from "jsonwebtoken";
 
 class User extends Model {
   static init(sequelize) {
     super.init(
       {
         username: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.STRING,
           allowNull: false,
           validate: {
             len: {
@@ -85,6 +86,10 @@ class User extends Model {
 
   isPasswordValid(password) {
     return bcrypt.compare(password, this.passwordHash);
+  }
+
+  createUserToken(email) {
+    return jwt.sign({ email }, process.env.TOKEN_SECRET, { expiresIn: "7d" });
   }
 
   static associate(models) {
