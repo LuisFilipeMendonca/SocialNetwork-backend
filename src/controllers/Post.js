@@ -67,20 +67,12 @@ class PostController {
           {
             model: Like,
           },
-          {
-            model: Comment,
-            include: [
-              {
-                model: User,
-              },
-            ],
-          },
         ],
       });
 
-      // const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
+      const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
 
-      return res.status(200).json(posts);
+      return res.status(200).json(updatedPosts);
     } catch (e) {
       console.log(e);
     }

@@ -7,6 +7,6 @@ const router = new Router();
 
 router.post("/", userController.createUser);
 router.put("/:id", userController.updateUser);
-router.get("/:userId", userController.getUser);
+router.get("/:userId", loginRequired, userController.getUser);
 
 export default router;

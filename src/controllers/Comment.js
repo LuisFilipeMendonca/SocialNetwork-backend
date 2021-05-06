@@ -4,16 +4,17 @@ import User from "../models/User";
 class CommentController {
   async postComment(req, res) {
     try {
+      const { id, username, profilePicture, profilePictureUrl } = req.user;
+
       const data = {
         comment: req.body.comment,
-        userId: 5,
+        userId: id,
         postId: req.body.postId,
       };
 
       const commentData = await Comment.create(data);
 
       const { comment, createdAt, id: postId } = commentData;
-      const { id, username, profilePicture, profilePictureUrl } = req.user;
 
       return res.status(200).json({
         id: postId,
@@ -35,7 +36,7 @@ class CommentController {
 
       const newOffset = (+page - 1) * limit + +offset;
 
-      const comments = await Comment.findAndCountAll({
+      const comments = await Comment.findAll({
         where: { postId },
         attributes: { exclude: ["updatedAt"] },
         order: [["createdAt", "DESC"]],
@@ -54,12 +55,9 @@ class CommentController {
         ],
       });
 
-      return res.status(200).json({
-        count: Math.ceil((comments.count - offset) / limit),
-        comments: [...comments.rows],
-        page: ++page,
-        offset: +offset,
-      });
+      return res
+        .status(200)
+        .json({ hasMoreComments: comments.length / limit === 1, comments });
     } catch (e) {
       console.log(e);
     }

@@ -30,17 +30,18 @@ class TokenController {
           .json({ field: "password", msg: "Your password is invalid." });
       }
 
-      const token = user.createUserToken(user.email);
+      const userToken = user.createUserToken(user.email);
 
       console.log(user);
 
       return res.status(200).json({
         userId: user.id,
         userEmail: user.email,
-        userProfilePicture: user.profilePictureUrl,
+        userProfilePicture: user.profilePicture,
+        userProfilePictureUrl: user.profilePictureUrl,
         userName: user.username,
         userFirstTime: user.firstTime,
-        token,
+        userToken,
       });
     } catch (e) {
       console.log(e);

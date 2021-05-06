@@ -4,6 +4,7 @@ import multerConfig from "../config/multer";
 import User from "../models/User";
 import Post from "../models/Post";
 import PostPhoto from "../models/PostPhoto";
+import Like from "../models/Like";
 
 const upload = multer(multerConfig).single("profilePicture");
 
@@ -32,15 +33,16 @@ class UserController {
 
         const user = await User.create(userData);
 
-        const token = user.createUserToken(user.email);
+        const userToken = user.createUserToken(user.email);
 
         return res.status(200).json({
           userId: user.id,
           userEmail: user.email,
-          userProfilePicture: user.profilePictureUrl,
+          userProfilePicture: user.profilePicture,
+          userProfilePictureUrl: user.profilePictureUrl,
           userName: user.username,
           userFirstTime: user.firstTime,
-          token,
+          userToken,
         });
       } catch (e) {
         console.log(e);
@@ -91,12 +93,15 @@ class UserController {
         include: [
           {
             model: Post,
-            attributes: ["id"],
+            attributes: ["id", "createdAt", "description"],
             include: [
               {
                 model: PostPhoto,
                 attributes: ["postPhotoUrl", "postPhoto"],
-                limit: 1,
+              },
+              {
+                model: Like,
+                attributes: ["id", "userId"],
               },
             ],
           },
@@ -104,7 +109,12 @@ class UserController {
         order: [["Posts", "id", "DESC"]],
       });
 
-      return res.status(200).json(user);
+      const posts = Like.searchLikeAndAddCommentData(req.user.id, user.Posts);
+      const { profilePictureUrl, profilePicture, username } = user;
+
+      return res
+        .status(200)
+        .json({ profilePicture, profilePictureUrl, username, posts });
     } catch (e) {
       console.log(e);
     }
