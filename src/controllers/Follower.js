@@ -3,16 +3,16 @@ import Follower from "../models/Follower";
 import User from "../models/User";
 
 class FollowerController {
-  async post(req, res) {
+  async postFollower(req, res) {
     try {
       const data = [
         {
           userId: req.user.id,
-          followerId: req.body.followerId,
+          followerId: +req.body.followerId,
           type: "following",
         },
         {
-          userId: req.body.followerId,
+          userId: +req.body.followerId,
           followerId: req.user.id,
           type: "followed",
         },
@@ -26,20 +26,21 @@ class FollowerController {
     }
   }
 
-  async getFollowers(req, res) {
+  async deleteFollower(req, res) {
     try {
-      const followers = await Follower.findAll({
+      const userId = req.user.id;
+      const { followerId } = req.params;
+
+      await Follower.destroy({
         where: {
-          [Op.or]: [{ userId: req.user.id }, { followerId: req.user.id }],
+          [Op.or]: [
+            { userId, followerId, type: "following" },
+            { userId: followerId, followerId: userId, type: "followed" },
+          ],
         },
-        include: [
-          {
-            model: User,
-          },
-        ],
       });
 
-      return res.status(200).json(followers);
+      return res.status(200).json({});
     } catch (e) {
       console.log(e);
     }

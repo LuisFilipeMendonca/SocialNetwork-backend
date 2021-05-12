@@ -5,7 +5,7 @@ import loginRequired from "../middlewares/loginRequired";
 
 const router = Router();
 
-router.post("/", loginRequired, followerController.post);
-router.get("/", loginRequired, followerController.getFollowers);
+router.post("/", loginRequired, followerController.postFollower);
+router.delete("/:followerId", loginRequired, followerController.deleteFollower);
 
 export default router;
