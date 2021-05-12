@@ -1,10 +1,11 @@
 import multer from "multer";
 import multerConfig from "../config/multer";
+import { Op } from "sequelize";
 
 import User from "../models/User";
 import Post from "../models/Post";
 import PostPhoto from "../models/PostPhoto";
-import Like from "../models/Like";
+import Follower from "../models/Follower";
 
 const upload = multer(multerConfig).single("profilePicture");
 
@@ -53,6 +54,7 @@ class UserController {
   async updateUser(req, res) {
     upload(req, res, async (photoError) => {
       if (photoError) {
+        console.log(photoError);
         return res.status(400).json({
           field: "file",
           msg: photoError.code,
@@ -60,19 +62,26 @@ class UserController {
       }
 
       try {
-        let userData = req.body;
+        let userData = { ...req.body, firstTime: false };
 
         if (req.file) {
-          userData = { ...userData, profilePicture: req.file.filename };
+          userData = {
+            ...userData,
+            profilePicture: req.file.filename,
+          };
         }
 
-        // PRECISO ENDIREITAR
-
-        const user = await User.findByPk(req.params.id);
+        const user = await User.findByPk(req.user.id);
 
         await user.update(userData);
 
-        return res.status(200).json(user);
+        return res.status(200).json({
+          userEmail: user.email,
+          userProfilePicture: user.profilePicture,
+          userProfilePictureUrl: user.profilePictureUrl,
+          userName: user.username,
+          userFirstTime: user.firstTime,
+        });
       } catch (e) {
         console.log(e);
       }
@@ -93,15 +102,20 @@ class UserController {
         include: [
           {
             model: Post,
-            attributes: ["id", "createdAt", "description"],
+            attributes: ["id"],
             include: [
               {
                 model: PostPhoto,
                 attributes: ["postPhotoUrl", "postPhoto"],
+                limit: 1,
               },
+            ],
+          },
+          {
+            model: Follower,
+            include: [
               {
-                model: Like,
-                attributes: ["id", "userId"],
+                model: User,
               },
             ],
           },
@@ -109,12 +123,9 @@ class UserController {
         order: [["Posts", "id", "DESC"]],
       });
 
-      const posts = Like.searchLikeAndAddCommentData(req.user.id, user.Posts);
-      const { profilePictureUrl, profilePicture, username } = user;
+      const updatedUserData = Follower.getFollowersAndFollowing(user);
 
-      return res
-        .status(200)
-        .json({ profilePicture, profilePictureUrl, username, posts });
+      return res.status(200).json(updatedUserData);
     } catch (e) {
       console.log(e);
     }

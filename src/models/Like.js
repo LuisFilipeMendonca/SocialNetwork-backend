@@ -22,10 +22,8 @@ class Like extends Model {
   }
 
   static searchLikeAndAddCommentData(userId, posts) {
-    console.log(posts);
     const postsString = JSON.stringify(posts);
     return JSON.parse(postsString).map((post) => {
-      console.log(post.Likes.some((like) => like.userId === userId));
       return {
         ...post,
         alreadyLiked: post.Likes.some((like) => like.userId === userId),

@@ -14,6 +14,7 @@ import tokenRoutes from "./src/routes/token";
 import postRoutes from "./src/routes/post";
 import commentRoutes from "./src/routes/comment";
 import likeRoutes from "./src/routes/like";
+import followerRoutes from "./src/routes/follower";
 
 class App {
   constructor() {
@@ -36,6 +37,7 @@ class App {
     this.app.use("/posts", postRoutes);
     this.app.use("/comments", commentRoutes);
     this.app.use("/likes", likeRoutes);
+    this.app.use("/followers", followerRoutes);
   }
 }
 

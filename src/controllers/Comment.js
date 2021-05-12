@@ -14,10 +14,10 @@ class CommentController {
 
       const commentData = await Comment.create(data);
 
-      const { comment, createdAt, id: postId } = commentData;
+      const { comment, createdAt, id: commentId } = commentData;
 
       return res.status(200).json({
-        id: postId,
+        id: commentId,
         comment,
         createdAt,
         User: { id, username, profilePicture, profilePictureUrl },
@@ -32,7 +32,7 @@ class CommentController {
       const { postId } = req.params;
       let { page, offset } = req.query;
 
-      const limit = 3;
+      const limit = 5;
 
       const newOffset = (+page - 1) * limit + +offset;
 

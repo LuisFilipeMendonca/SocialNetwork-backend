@@ -81,6 +81,11 @@ class User extends Model {
       user.passwordHash = await bcrypt.hash(user.password, 8);
     });
 
+    this.addHook("beforeUpdate", async (user) => {
+      if (!user.password) return;
+      user.passwordHash = await bcrypt.hash(user.password, 8);
+    });
+
     return this;
   }
 
@@ -96,6 +101,7 @@ class User extends Model {
     this.hasMany(models.Post, { foreignKey: "userId" });
     this.hasMany(models.Comment, { foreignKey: "userId" });
     this.hasMany(models.Like, { foreignKey: "userId" });
+    this.hasMany(models.Follower, { foreignKey: "userId" });
   }
 }
 

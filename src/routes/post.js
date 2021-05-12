@@ -5,9 +5,9 @@ import postController from "../controllers/Post";
 
 const router = new Router();
 
-router.post("/", postController.createPost);
+router.post("/", loginRequired, postController.createPost);
 router.get("/", loginRequired, postController.getPosts);
-router.get("/:id", postController.getPost);
+router.get("/:id", loginRequired, postController.getPost);
 router.delete("/:id", postController.deletePost);
 
 export default router;

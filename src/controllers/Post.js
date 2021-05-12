@@ -24,7 +24,7 @@ class PostController {
 
         const postData = {
           description,
-          userId: 3,
+          userId: req.user.id,
         };
 
         const post = (await Post.create(postData)).toJSON();
@@ -50,13 +50,22 @@ class PostController {
   async getPosts(req, res) {
     try {
       const posts = await Post.findAll({
-        order: [["createdAt", "DESC"]],
+        order: [
+          ["createdAt", "DESC"],
+          ["PostPhotos", "id", "ASC"],
+        ],
         attributes: {
           exclude: ["updatedAt", "userId"],
         },
         include: [
           {
             model: User,
+            attributes: [
+              "profilePicture",
+              "profilePictureUrl",
+              "username",
+              "id",
+            ],
           },
           {
             model: PostPhoto,
@@ -66,6 +75,7 @@ class PostController {
           },
           {
             model: Like,
+            attributes: ["userId"],
           },
         ],
       });
@@ -96,22 +106,7 @@ class PostController {
           },
           {
             model: PostPhoto,
-            attributes: ["postPhotoUrl", "postPhoto"],
-          },
-          {
-            model: Comment,
-            attributes: ["comment", "createdAt"],
-            include: [
-              {
-                model: User,
-                attributes: [
-                  "profilePictureUrl",
-                  "username",
-                  "id",
-                  "profilePicture",
-                ],
-              },
-            ],
+            attributes: ["postPhotoUrl", "postPhoto", "id"],
           },
           {
             model: Like,
@@ -120,9 +115,9 @@ class PostController {
         ],
       });
 
-      const updatedPosts = Like.searchUserLike(req.user.id, post);
+      const updatedPost = Like.searchLikeAndAddCommentData(req.user.id, [post]);
 
-      return res.status(200).json(updatedPosts);
+      return res.status(200).json(updatedPost);
     } catch (e) {
       console.log(e);
     }
