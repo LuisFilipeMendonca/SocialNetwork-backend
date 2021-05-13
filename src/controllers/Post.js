@@ -1,10 +1,11 @@
+import { Op } from "sequelize";
 import multer from "multer";
 import multerConfig from "../config/multer";
 
 import Post from "../models/Post";
 import PostPhoto from "../models/PostPhoto";
 import User from "../models/User";
-import Comment from "../models/Comment";
+import Follower from "../models/Follower";
 import Like from "../models/Like";
 
 const upload = multer(multerConfig).array("postPhoto", 5);
@@ -132,6 +133,64 @@ class PostController {
       await post.destroy();
 
       return res.status(200).json({ msg: "Your post was deleted." });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async getFollowingPosts(req, res) {
+    try {
+      let userFollowingIds = await Follower.findAll({
+        where: {
+          userId: req.user.id,
+          type: "following",
+        },
+        attributes: ["followerId"],
+      });
+
+      userFollowingIds = userFollowingIds.map(
+        (follower) => follower.followerId
+      );
+
+      const posts = await Post.findAll({
+        where: {
+          userId: {
+            [Op.or]: userFollowingIds,
+          },
+        },
+        order: [
+          ["createdAt", "DESC"],
+          ["PostPhotos", "id", "ASC"],
+        ],
+        attributes: {
+          exclude: ["updatedAt", "userId"],
+        },
+        include: [
+          {
+            model: User,
+            attributes: [
+              "profilePicture",
+              "profilePictureUrl",
+              "username",
+              "id",
+            ],
+          },
+          {
+            model: PostPhoto,
+            attributes: {
+              exclude: ["createdAt", "updatedAt", "postId"],
+            },
+          },
+          {
+            model: Like,
+            attributes: ["userId"],
+          },
+        ],
+      });
+
+      const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
+
+      return res.status(200).json(updatedPosts);
     } catch (e) {
       console.log(e);
     }

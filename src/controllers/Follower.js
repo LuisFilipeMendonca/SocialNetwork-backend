@@ -1,6 +1,5 @@
 import { Op } from "sequelize";
 import Follower from "../models/Follower";
-import User from "../models/User";
 
 class FollowerController {
   async postFollower(req, res) {
