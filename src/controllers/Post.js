@@ -8,7 +8,7 @@ import User from "../models/User";
 import Follower from "../models/Follower";
 import Like from "../models/Like";
 
-const upload = multer(multerConfig).array("postPhoto", 5);
+const upload = multer(multerConfig).array("postPhoto");
 
 class PostController {
   async createPost(req, res) {
@@ -30,18 +30,18 @@ class PostController {
 
         const post = (await Post.create(postData)).toJSON();
 
-        const { id: postId } = post;
+        const { id } = post;
 
         const postPhotosData = req.files.map((file) => {
           return {
             postPhoto: file.filename,
-            postId,
+            postId: id,
           };
         });
 
         const postPhotos = await PostPhoto.bulkCreate(postPhotosData);
 
-        return res.status(200).json({ ...post, postPhotos });
+        return res.status(200).json({ id, PostPhotos: [postPhotos[0]] });
       } catch (e) {
         console.log(e);
       }

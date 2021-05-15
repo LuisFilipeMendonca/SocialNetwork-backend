@@ -130,6 +130,25 @@ class UserController {
       console.log(e);
     }
   }
+
+  async searchUser(req, res) {
+    try {
+      const { username } = req.params;
+
+      const searchedUsers = await User.findAll({
+        where: {
+          username: {
+            [Op.like]: `${username}%`,
+          },
+        },
+        attributes: ["id", "username", "profilePicture", "profilePictureUrl"],
+      });
+
+      return res.status(200).json(searchedUsers);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 export default new UserController();

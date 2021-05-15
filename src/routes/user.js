@@ -8,5 +8,6 @@ const router = new Router();
 router.post("/", userController.createUser);
 router.put("/", loginRequired, userController.updateUser);
 router.get("/:userId", loginRequired, userController.getUser);
+router.get("/search/:username", loginRequired, userController.searchUser);
 
 export default router;
