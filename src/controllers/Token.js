@@ -1,23 +1,14 @@
 import User from "../models/User";
+import Error from "../util/Error";
 
 class TokenController {
-  async createUserToken(req, res) {
+  async createUserToken(req, res, next) {
     try {
       const { email, password } = req.body;
 
-      if (!email) {
-        return res
-          .status(400)
-          .json({ field: "email", msg: "Your email cannot be empty." });
+      if (!email || !password) {
+        next(new Error(400, "Email and password required"));
       }
-
-      if (!password) {
-        return res
-          .status(400)
-          .json({ field: "password", msg: "Your password cannot be empty." });
-      }
-
-      // ENDIREITAR
 
       const user = await User.findOne({
         where: { email },
@@ -25,14 +16,10 @@ class TokenController {
       });
 
       if (!(await user.isPasswordValid(password))) {
-        return res
-          .status(400)
-          .json({ field: "password", msg: "Your password is invalid." });
+        next(new Error(401, "Invalid credentials"));
       }
 
       const userToken = user.createUserToken(user.email);
-
-      console.log(user);
 
       return res.status(200).json({
         userId: user.id,
@@ -44,7 +31,7 @@ class TokenController {
         userToken,
       });
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 }

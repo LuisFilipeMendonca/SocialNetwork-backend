@@ -15,6 +15,14 @@ class User extends Model {
               args: [3, 16],
               msg: "Your username should have between 3 and 16 characters",
             },
+            isUnique: async function (value, next) {
+              const user = await User.findOne({ where: { username: value } });
+
+              if (user) {
+                return next("Username already in use");
+              }
+              return next();
+            },
           },
         },
         email: {
@@ -24,6 +32,14 @@ class User extends Model {
             isEmail: {
               msg: "Your email is invalid",
             },
+            isUnique: async function (value, next) {
+              const user = await User.findOne({ where: { email: value } });
+
+              if (user) {
+                return next("Email already in use");
+              }
+              return next();
+            },
           },
         },
         password: {
@@ -32,7 +48,7 @@ class User extends Model {
           validate: {
             len: {
               args: 8,
-              msg: "Your password must have at least 3 characters",
+              msg: "Your password must have at least 8 characters",
             },
           },
         },

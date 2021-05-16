@@ -1,8 +1,10 @@
 import Comment from "../models/Comment";
 import User from "../models/User";
 
+import Error from "../util/Error";
+
 class CommentController {
-  async postComment(req, res) {
+  async postComment(req, res, next) {
     try {
       const { id, username, profilePicture, profilePictureUrl } = req.user;
 
@@ -14,6 +16,10 @@ class CommentController {
 
       const commentData = await Comment.create(data);
 
+      if (!commentData) {
+        next(new Error(400, "Error adding your comment"));
+      }
+
       const { comment, createdAt, id: commentId } = commentData;
 
       return res.status(200).json({
@@ -23,11 +29,11 @@ class CommentController {
         User: { id, username, profilePicture, profilePictureUrl },
       });
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
-  async getPostComments(req, res) {
+  async getPostComments(req, res, next) {
     try {
       const { postId } = req.params;
       let { page, offset } = req.query;
@@ -59,7 +65,7 @@ class CommentController {
         .status(200)
         .json({ hasMoreComments: comments.length / limit === 1, comments });
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 }

@@ -1,8 +1,11 @@
 import { Op } from "sequelize";
+
 import Follower from "../models/Follower";
 
+import Error from "../util/Error";
+
 class FollowerController {
-  async postFollower(req, res) {
+  async postFollower(req, res, next) {
     try {
       const data = [
         {
@@ -19,13 +22,17 @@ class FollowerController {
 
       const follower = await Follower.bulkCreate(data);
 
+      if (!follower) {
+        next(new Error(400, "Error following that user"));
+      }
+
       return res.status(201).json(follower);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
-  async deleteFollower(req, res) {
+  async deleteFollower(req, res, next) {
     try {
       const userId = req.user.id;
       const { followerId } = req.params;
@@ -41,7 +48,7 @@ class FollowerController {
 
       return res.status(200).json({});
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 }

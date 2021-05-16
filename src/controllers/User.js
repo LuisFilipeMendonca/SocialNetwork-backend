@@ -7,58 +7,35 @@ import Post from "../models/Post";
 import PostPhoto from "../models/PostPhoto";
 import Follower from "../models/Follower";
 
+import Error from "../util/Error";
+
 const upload = multer(multerConfig).single("profilePicture");
 
 class UserController {
-  async createUser(req, res) {
-    return upload(req, res, async (photoError) => {
-      if (photoError) {
-        return res.status(400).json({
-          field: "file",
-          msg: photoError.code,
-        });
-      }
+  async createUser(req, res, next) {
+    try {
+      const user = await User.create(req.body);
 
-      try {
-        const { username, email, password } = req.body;
+      const userToken = user.createUserToken(user.email);
 
-        let userData = {
-          username,
-          email,
-          password,
-        };
-
-        if (req.file) {
-          userData = { ...userData, profilePicture: req.file.filename };
-        }
-
-        const user = await User.create(userData);
-
-        const userToken = user.createUserToken(user.email);
-
-        return res.status(200).json({
-          userId: user.id,
-          userEmail: user.email,
-          userProfilePicture: user.profilePicture,
-          userProfilePictureUrl: user.profilePictureUrl,
-          userName: user.username,
-          userFirstTime: user.firstTime,
-          userToken,
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    });
+      return res.status(200).json({
+        userId: user.id,
+        userEmail: user.email,
+        userProfilePicture: user.profilePicture,
+        userProfilePictureUrl: user.profilePictureUrl,
+        userName: user.username,
+        userFirstTime: user.firstTime,
+        userToken,
+      });
+    } catch (e) {
+      next(e);
+    }
   }
 
-  async updateUser(req, res) {
+  async updateUser(req, res, next) {
     upload(req, res, async (photoError) => {
       if (photoError) {
-        console.log(photoError);
-        return res.status(400).json({
-          field: "file",
-          msg: photoError.code,
-        });
+        next(new Error(415, photoError.code));
       }
 
       try {
@@ -71,7 +48,15 @@ class UserController {
           };
         }
 
+        if (!req.user || !req.user.id) {
+          next(new Error(400, "User not found"));
+        }
+
         const user = await User.findByPk(req.user.id);
+
+        if (!user) {
+          next(new Error(400, "User not found"));
+        }
 
         await user.update(userData);
 
@@ -83,14 +68,18 @@ class UserController {
           userFirstTime: user.firstTime,
         });
       } catch (e) {
-        console.log(e);
+        next(e);
       }
     });
   }
 
-  async getUser(req, res) {
+  async getUser(req, res, next) {
     try {
       const { userId } = req.params;
+
+      if (!userId) {
+        next(new Error(400, "No user id provided"));
+      }
 
       const user = await User.findByPk(userId, {
         attributes: [
@@ -127,13 +116,17 @@ class UserController {
 
       return res.status(200).json(updatedUserData);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
-  async searchUser(req, res) {
+  async searchUser(req, res, next) {
     try {
       const { username } = req.params;
+
+      if (!username) {
+        next(new Error(400, "No username provided"));
+      }
 
       const searchedUsers = await User.findAll({
         where: {
@@ -146,7 +139,7 @@ class UserController {
 
       return res.status(200).json(searchedUsers);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 }

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import cors from "cors";
 import { resolve } from "path";
+import errorHandler from "./src/middlewares/errorHandler";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ class App {
     this.app.use("/comments", commentRoutes);
     this.app.use("/likes", likeRoutes);
     this.app.use("/followers", followerRoutes);
+    this.app.use(errorHandler);
   }
 }
 

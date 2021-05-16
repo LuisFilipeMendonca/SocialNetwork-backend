@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 
+import Error from "../util/Error";
+
 export default async (req, res, next) => {
   try {
     const { authorization } = req.headers;
 
     if (!authorization) {
-      return res
-        .status(401)
-        .json({ errorMsg: "You need to login in your account" });
+      next(new Error(401, "You need to login in your account"));
     }
 
     const [, token] = authorization.split(" ");
@@ -16,9 +16,7 @@ export default async (req, res, next) => {
     const userData = jwt.verify(token, process.env.TOKEN_SECRET);
 
     if (!userData) {
-      return res
-        .status(401)
-        .json({ errorMsg: "Your session expired. Please login again." });
+      next(new Error(401, "Your session expired. Please login again."));
     }
 
     const user = await User.findOne({
@@ -27,15 +25,13 @@ export default async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ errorMsg: "Your account doesn't exists." });
+      next(new Error(401, "Your account doesn't exist"));
     }
 
     req.user = user;
 
     next();
   } catch (e) {
-    return res
-      .status(401)
-      .json({ errorMsg: "Your session expired. Please login again." });
+    next(new Error(401, "Your session expired. Please login again."));
   }
 };

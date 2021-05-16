@@ -8,16 +8,15 @@ import User from "../models/User";
 import Follower from "../models/Follower";
 import Like from "../models/Like";
 
+import Error from "../util/Error";
+
 const upload = multer(multerConfig).array("postPhoto");
 
 class PostController {
-  async createPost(req, res) {
+  async createPost(req, res, next) {
     return upload(req, res, async (photoError) => {
       if (photoError) {
-        return res.status(400).json({
-          field: "file",
-          msg: photoError.code,
-        });
+        next(new Error(415, photoError.code));
       }
 
       try {
@@ -43,12 +42,12 @@ class PostController {
 
         return res.status(200).json({ id, PostPhotos: [postPhotos[0]] });
       } catch (e) {
-        console.log(e);
+        next(e);
       }
     });
   }
 
-  async getPosts(req, res) {
+  async getPosts(req, res, next) {
     try {
       const posts = await Post.findAll({
         order: [
@@ -85,13 +84,17 @@ class PostController {
 
       return res.status(200).json(updatedPosts);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
-  async getPost(req, res) {
+  async getPost(req, res, next) {
     try {
       const { id } = req.params;
+
+      if (!id) {
+        next(new Error(400, "A post id is needed"));
+      }
 
       const post = await Post.findByPk(id, {
         attributes: ["id", "description", "createdAt"],
@@ -120,25 +123,33 @@ class PostController {
 
       return res.status(200).json(updatedPost);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
-  async deletePost(req, res) {
+  async deletePost(req, res, next) {
     try {
       const { id } = req.params;
 
+      if (!id) {
+        next(new Error(400, "A post id is needed"));
+      }
+
       const post = await Post.findByPk(id);
+
+      if (!id) {
+        next(new Error(400, "No post found"));
+      }
 
       await post.destroy();
 
       return res.status(200).json({ msg: "Your post was deleted." });
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
-  async getFollowingPosts(req, res) {
+  async getFollowingPosts(req, res, next) {
     try {
       let userFollowingIds = await Follower.findAll({
         where: {
@@ -192,7 +203,7 @@ class PostController {
 
       return res.status(200).json(updatedPosts);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 }
