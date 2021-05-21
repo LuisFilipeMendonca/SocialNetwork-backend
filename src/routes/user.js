@@ -9,5 +9,6 @@ router.post("/", userController.createUser);
 router.put("/", loginRequired, userController.updateUser);
 router.get("/:userId", loginRequired, userController.getUser);
 router.get("/search/:username", loginRequired, userController.searchUser);
+router.delete("/:userId", loginRequired, userController.deleteUser);
 
 export default router;

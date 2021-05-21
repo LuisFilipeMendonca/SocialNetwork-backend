@@ -142,6 +142,28 @@ class UserController {
       next(e);
     }
   }
+
+  async deleteUser(req, res, next) {
+    try {
+      const { userId } = req.params;
+
+      if (!userId) {
+        next(new Error(400, "No user id provided"));
+      }
+
+      const user = await User.findByPk(userId);
+
+      if (!user) {
+        next(new Error(400, "The user you're trying to delete don't exist"));
+      }
+
+      await user.destroy();
+
+      return res.status(200).json("Account successfully deleted");
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 export default new UserController();
