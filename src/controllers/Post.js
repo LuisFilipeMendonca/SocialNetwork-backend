@@ -49,14 +49,20 @@ class PostController {
 
   async getPosts(req, res, next) {
     try {
+      let { page } = req.query;
+
+      const limit = 5;
+
+      const offset = (+page - 1) * limit;
+
       const posts = await Post.findAll({
         order: [
           ["createdAt", "DESC"],
           ["PostPhotos", "id", "ASC"],
         ],
-        attributes: {
-          exclude: ["updatedAt", "userId"],
-        },
+        attributes: ["id", "description", "createdAt", "userId"],
+        limit,
+        offset,
         include: [
           {
             model: User,
@@ -82,8 +88,12 @@ class PostController {
 
       const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
 
-      return res.status(200).json(updatedPosts);
+      return res.status(200).json({
+        posts: updatedPosts,
+        hasMorePosts: updatedPosts.length === limit,
+      });
     } catch (e) {
+      console.log(e);
       next(e);
     }
   }
@@ -151,6 +161,12 @@ class PostController {
 
   async getFollowingPosts(req, res, next) {
     try {
+      let { page } = req.query;
+
+      const limit = 5;
+
+      const offset = (+page - 1) * limit;
+
       let userFollowingIds = await Follower.findAll({
         where: {
           userId: req.user.id,
@@ -163,6 +179,8 @@ class PostController {
         (follower) => follower.followerId
       );
 
+      console.log(page, offset);
+
       const posts = await Post.findAll({
         where: {
           userId: {
@@ -173,9 +191,9 @@ class PostController {
           ["createdAt", "DESC"],
           ["PostPhotos", "id", "ASC"],
         ],
-        attributes: {
-          exclude: ["updatedAt", "userId"],
-        },
+        attributes: ["id", "description", "createdAt", "userId"],
+        limit,
+        offset,
         include: [
           {
             model: User,
@@ -201,7 +219,10 @@ class PostController {
 
       const updatedPosts = Like.searchLikeAndAddCommentData(req.user.id, posts);
 
-      return res.status(200).json(updatedPosts);
+      return res.status(200).json({
+        posts: updatedPosts,
+        hasMorePosts: updatedPosts.length === limit,
+      });
     } catch (e) {
       next(e);
     }
