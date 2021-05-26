@@ -179,7 +179,12 @@ class PostController {
         (follower) => follower.followerId
       );
 
-      console.log(page, offset);
+      if (!userFollowingIds.length) {
+        return res.status(200).json({
+          posts: [],
+          hasMorePosts: false,
+        });
+      }
 
       const posts = await Post.findAll({
         where: {
